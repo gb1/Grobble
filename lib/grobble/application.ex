@@ -9,7 +9,7 @@ defmodule Grobble.Application do
   def start(_type, _args) do
     children = [
       # Start the Ecto repository
-      # Grobble.Repo,
+      Grobble.Repo,
       # Start the Telemetry supervisor
       GrobbleWeb.Telemetry,
       # Start the PubSub system

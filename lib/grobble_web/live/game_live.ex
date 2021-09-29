@@ -6,20 +6,19 @@ defmodule GrobbleWeb.GameLive do
   def mount(_params, _session, socket) do
     game = Game.new_game()
 
-    socket =
-      assign(socket,
-        player1_card: game.player1_card,
-        top_card: game.top_card,
-        player2_card: game.player2_card
-      )
+    socket = assign(socket, game: game)
 
     {:ok, socket}
   end
 
   @impl true
-  def handle_event("click", unsigned_params, socket) do
-    IO.inspect(unsigned_params)
-    {:noreply, socket}
+  def handle_event("player1-guess", %{"emoji" => guess}, socket) do
+    {:noreply, assign(socket, game: Game.guess(socket.assigns.game, :player1, guess))}
+  end
+
+  @impl true
+  def handle_event("player2-guess", %{"emoji" => guess}, socket) do
+    {:noreply, assign(socket, game: Game.guess(socket.assigns.game, :player2, guess))}
   end
 
   @impl true
@@ -27,27 +26,28 @@ defmodule GrobbleWeb.GameLive do
     ~H"""
 
     <div class="game">
+    <div class="card">
 
+    <%= for pic <- @game.player1_card do %>
+    <button phx-click="player1-guess" phx-value-emoji={ pic } class="emoji"><%= pic %></button>
+    <% end %>
+    <h4>Jesse: <%= @game.player1_score %></h4>
+    </div>
 
     <div class="card">
-    <h2>Jesse</h2>
-    <%= for pic <- @player1_card do %>
-    <button phx-click="click" phx-value-emoji={ pic } class="emoji"><%= pic %></button>
+    <%= for pic <- @game.top_card do %>
+    <button class="emoji"><%= pic %></button>
     <% end %>
     </div>
 
     <div class="card">
-    <%= for pic <- @top_card do %>
-    <button phx-click="click" class="emoji"><%= pic %></button>
+
+    <%= for pic <- @game.player2_card do %>
+    <button phx-click="player2-guess" phx-value-emoji={ pic } class="emoji"><%= pic %></button>
     <% end %>
+    <h4>Daddy: <%= @game.player2_score %></h4>
     </div>
 
-    <div class="card">
-    <h2>Daddy</h2>
-    <%= for pic <- @player2_card do %>
-    <button phx-click="click" class="emoji"><%= pic %></button>
-    <% end %>
-    </div>
 
     </div>
 
