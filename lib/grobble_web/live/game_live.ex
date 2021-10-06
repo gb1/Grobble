@@ -1,6 +1,7 @@
 defmodule GrobbleWeb.GameLive do
   use GrobbleWeb, :live_view
   alias Grobble.Game
+  alias GrobbleWeb.Card
 
   @impl true
   def mount(_params, _session, socket) do
@@ -22,33 +23,31 @@ defmodule GrobbleWeb.GameLive do
   end
 
   @impl true
+  def handle_info(:unfreeze_player1, socket) do
+    {:noreply, assign(socket, game: Game.unfreeze_player(socket.assigns.game, :player1))}
+  end
+
+  @impl true
+  def handle_info(:unfreeze_player2, socket) do
+    {:noreply, assign(socket, game: Game.unfreeze_player(socket.assigns.game, :player2))}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
 
-    <div class="game">
-    <div class="card">
+    <div class="game p-5">
+      <div class="flex justify-between p-5 px-16 mb-32 opacity-60 shadow-xl rounded-2xl">
+        <h4 class="text-5xl text-gray-600"><%= @game.player1_name %> <span class="mx-10"><%= @game.player1_score %></span></h4>
+        <h4 class="text-3xl text-gray-600">Cards: <%= @game.deck |> length %></h4>
+        <h4 class="text-5xl text-gray-600"><%= @game.player2_name %> <span class="mx-10"><%= @game.player2_score %></span></h4>
+      </div>
 
-    <%= for pic <- @game.player1_card do %>
-    <button phx-click="player1-guess" phx-value-emoji={ pic } class="emoji"><%= pic %></button>
-    <% end %>
-    <h4>Jesse: <%= @game.player1_score %></h4>
-    </div>
-
-    <div class="card">
-    <%= for pic <- @game.top_card do %>
-    <button class="emoji"><%= pic %></button>
-    <% end %>
-    </div>
-
-    <div class="card">
-
-    <%= for pic <- @game.player2_card do %>
-    <button phx-click="player2-guess" phx-value-emoji={ pic } class="emoji"><%= pic %></button>
-    <% end %>
-    <h4>Daddy: <%= @game.player2_score %></h4>
-    </div>
-
-
+      <div class="cards">
+        <Card.player_card card={@game.player1_card} frozen={@game.player1_frozen}  action="player1-guess" />
+        <Card.top_card card={@game.top_card} action="boop"/>
+        <Card.player_card card={@game.player2_card} frozen={@game.player2_frozen} action="player2-guess" />
+      </div>
     </div>
 
     """

@@ -18,6 +18,7 @@ defmodule GrobbleWeb.Router do
     pipe_through :browser
 
     live "/", GameLive, :index
+    live "/tw", TailLive, :index
   end
 
   # Other scopes may use custom stacks.

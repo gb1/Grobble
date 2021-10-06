@@ -55,7 +55,7 @@ defmodule Grobble.Emojis do
     🐬
     🐡
     🐙
-    🥶
+    💥
     😺]
   end
 
