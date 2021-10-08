@@ -25,6 +25,8 @@ defmodule Grobble.Game do
 
   def guess(game, player, guess) do
     if guess in game.top_card do
+      send(self(), :new_round)
+
       case player do
         :player1 ->
           deal(%{game | player1_card: game.top_card, player1_score: game.player1_score + 1})
@@ -35,11 +37,11 @@ defmodule Grobble.Game do
     else
       case player do
         :player1 ->
-          :timer.send_after(5000, self(), :unfreeze_player1)
+          :timer.send_after(1000, self(), :unfreeze_player1)
           %{game | player1_frozen: true}
 
         :player2 ->
-          :timer.send_after(5000, self(), :unfreeze_player2)
+          :timer.send_after(1000, self(), :unfreeze_player2)
           %{game | player2_frozen: true}
       end
     end

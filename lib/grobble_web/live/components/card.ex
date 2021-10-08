@@ -21,7 +21,7 @@ defmodule GrobbleWeb.Card do
 
   def top_card(assigns) do
     ~H"""
-    <div class="card">
+    <div class={@newcard_animation}>
     <%= for pic <- @card do %>
       <Emoji.dealer_emoji pic={pic}/>
     <% end %>

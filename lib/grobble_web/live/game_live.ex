@@ -1,15 +1,18 @@
 defmodule GrobbleWeb.GameLive do
   use GrobbleWeb, :live_view
   alias Grobble.Game
-  alias GrobbleWeb.Card
+  alias GrobbleWeb.App
 
   @impl true
   def mount(_params, _session, socket) do
-    game = Game.new_game()
+    IO.puts("MOUNT!")
 
-    socket = assign(socket, game: game)
-
-    {:ok, socket}
+    if connected?(socket) do
+      game = Game.new_game()
+      {:ok, assign(socket, game: game, newcard_animation: "animate-new-card1")}
+    else
+      {:ok, socket}
+    end
   end
 
   @impl true
@@ -33,23 +36,46 @@ defmodule GrobbleWeb.GameLive do
   end
 
   @impl true
+  def handle_info(:new_round, socket) do
+    IO.puts("BOOP")
+
+    socket =
+      case socket.assigns.newcard_animation do
+        "animate-new-card1" ->
+          assign(socket, newcard_animation: "animate-new-card2")
+
+        "animate-new-card2" ->
+          assign(socket, newcard_animation: "animate-new-card1")
+      end
+
+    IO.inspect(socket.assigns.newcard_animation)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def render(assigns) do
-    ~H"""
+    cond do
+      Map.has_key?(assigns, :game) ->
+        game = assigns.game
+        player1 = MapSet.new(game.player1_card)
+        top = MapSet.new(game.top_card)
 
-    <div class="game p-5">
-      <div class="flex justify-between p-5 px-16 mb-32 opacity-60 shadow-xl rounded-2xl">
-        <h4 class="text-5xl text-gray-600"><%= @game.player1_name %> <span class="mx-10"><%= @game.player1_score %></span></h4>
-        <h4 class="text-3xl text-gray-600">Cards: <%= @game.deck |> length %></h4>
-        <h4 class="text-5xl text-gray-600"><%= @game.player2_name %> <span class="mx-10"><%= @game.player2_score %></span></h4>
-      </div>
+        answer =
+          MapSet.intersection(player1, top)
+          |> MapSet.to_list()
+          |> hd()
 
-      <div class="cards">
-        <Card.player_card card={@game.player1_card} frozen={@game.player1_frozen}  action="player1-guess" />
-        <Card.top_card card={@game.top_card} action="boop"/>
-        <Card.player_card card={@game.player2_card} frozen={@game.player2_frozen} action="player2-guess" />
-      </div>
-    </div>
+        ~H"""
 
-    """
+        <h1 class="text-6xl"><%= answer%></h1>
+
+        <App.new_game game={@game} newcard_animation={@newcard_animation}/>
+        """
+
+      true ->
+        ~H"""
+        """
+    end
   end
 end
